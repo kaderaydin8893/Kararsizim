@@ -8,6 +8,8 @@
     --primary-light: #eef2ff;
     --border-color: #e2e8f0;
     --border-focus: #818cf8;
+    --success: #10b981;
+    --success-light: #ecfdf5;
     --danger: #ef4444;
     --danger-light: #fef2f2;
     --radius: 10px;
@@ -94,7 +96,7 @@ body {
     text-decoration: none;
     cursor: pointer;
     border: 1px solid transparent;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
 
 .btn-primary {
@@ -355,47 +357,185 @@ body {
     margin-bottom: 2rem;
 }
 
-.options-heading {
-    font-size: 1.05rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
+/* Voting Box & Interactive Buttons */
+.voting-box {
+    margin-top: 1rem;
 }
 
-.option-list {
-    list-style: none;
+.voting-instruction {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.options-button-group {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-.option-item {
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
+.vote-option-btn {
+    width: 100%;
+    background-color: var(--bg-surface);
+    border: 1.5px solid var(--border-color);
     border-radius: var(--radius);
-    padding: 0.85rem 1.15rem;
+    padding: 1rem 1.25rem;
+    text-align: left;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 0.95rem;
-    font-weight: 500;
+    gap: 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    transition: all 0.15s ease-in-out;
 }
 
-.option-number {
-    color: var(--primary);
+.vote-option-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-option-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    flex-shrink: 0;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.vote-option-btn:hover:not(:disabled) .btn-option-indicator {
+    border-color: var(--primary);
+    background-color: #ffffff;
+}
+
+.btn-option-text {
+    flex: 1;
+}
+
+.vote-option-btn.btn-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.vote-option-btn.btn-loading {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+}
+
+/* Results Display & Progress Bars */
+.results-container {
+    margin-top: 1rem;
+}
+
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.results-title {
+    font-size: 1.05rem;
     font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.option-text {
     color: var(--text-primary);
 }
 
-.option-item-empty {
+.total-votes-badge {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
-    font-style: italic;
-    padding: 1rem;
-    text-align: center;
+    font-size: 0.825rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+}
+
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.result-row {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-row.is-selected {
+    border-color: var(--primary);
+    background-color: #fafaff;
+}
+
+.result-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.95rem;
+    z-index: 2;
+}
+
+.result-text {
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.your-vote-pill {
+    background-color: var(--primary);
+    color: #ffffff;
+    font-size: 0.725rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+
+.result-stats {
+    text-align: right;
+    white-space: nowrap;
+    color: var(--text-primary);
+}
+
+.vote-count-text {
+    color: var(--text-secondary);
+    font-size: 0.825rem;
+    margin-left: 0.25rem;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 10px;
+    background-color: var(--border-color);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #94a3b8;
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progress-bar-fill.fill-selected {
+    background-color: var(--primary);
 }
 
 .poll-detail-footer {

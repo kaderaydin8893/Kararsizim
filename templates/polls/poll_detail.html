@@ -1,10 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}{{ poll.question }} — Kararsızım{% endblock %}
 
 {% block content %}
 <div class="poll-detail-wrapper">
-    <div class="card poll-detail-card">
+    <div class="card poll-detail-card" 
+         id="poll-container" 
+         data-poll-id="{{ poll.pk }}" 
+         data-vote-url="{% url 'polls:vote' poll.pk %}"
+         data-has-voted="{% if user_vote %}true{% else %}false{% endif %}">
+        
         <header class="poll-detail-header">
             <div class="poll-meta">
                 <a href="/kullanici/{{ poll.author.username }}/" class="poll-author">@{{ poll.author.username }}</a>
@@ -18,17 +24,68 @@
         </header>
 
         <section class="poll-options-section">
-            <h2 class="options-heading">Seçenekler</h2>
-            <ul class="option-list">
-                {% for option in poll.options.all %}
-                    <li class="option-item">
-                        <span class="option-number">{{ forloop.counter }}.</span>
-                        <span class="option-text">{{ option.text }}</span>
-                    </li>
-                {% empty %}
-                    <li class="option-item-empty">Bu ankete henüz seçenek eklenmemiş.</li>
-                {% endfor %}
-            </ul>
+            <div id="vote-alert" class="message-item message-error" style="display: none;"></div>
+
+            {% if user_vote %}
+                {# Daha önce oy kullanılmışsa sonuçları doğrudan göster #}
+                <div class="results-container" id="results-container">
+                    <div class="results-header">
+                        <span class="results-title">Anket Sonuçları</span>
+                        <span class="total-votes-badge" id="total-votes-count">{{ poll_results.total_votes }} Toplam Oy</span>
+                    </div>
+
+                    <div class="results-list" id="results-list">
+                        {% for option in poll_results.options %}
+                            <div class="result-row {% if option.is_selected %}is-selected{% endif %}">
+                                <div class="result-info">
+                                    <span class="result-text">
+                                        {{ option.text }}
+                                        {% if option.is_selected %}
+                                            <span class="your-vote-pill">✓ Senin Oyun</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="result-stats">
+                                        <strong>%{{ option.percentage }}</strong>
+                                        <small class="vote-count-text">({{ option.vote_count }} oy)</small>
+                                    </span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill {% if option.is_selected %}fill-selected{% endif %}" 
+                                         style="width: {{ option.percentage }}%;"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                {# Henüz oy verilmemişse oy butonlarını göster #}
+                <div class="voting-box" id="voting-box">
+                    <p class="voting-instruction">Fikrini belirtmek için bir seçeneğe tıkla:</p>
+                    
+                    <form method="post" action="{% url 'polls:vote' poll.pk %}" id="vote-form" class="voting-form">
+                        {% csrf_token %}
+                        <div class="options-button-group">
+                            {% for option in poll.options.all %}
+                                <button type="button" 
+                                        class="vote-option-btn" 
+                                        data-option-id="{{ option.id }}">
+                                    <span class="btn-option-indicator"></span>
+                                    <span class="btn-option-text">{{ option.text }}</span>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </form>
+                </div>
+
+                {# Dinamik JavaScript sonuç kapsayıcısı (başlangıçta gizli) #}
+                <div class="results-container" id="results-container" style="display: none;">
+                    <div class="results-header">
+                        <span class="results-title">Anket Sonuçları</span>
+                        <span class="total-votes-badge" id="total-votes-count">0 Toplam Oy</span>
+                    </div>
+                    <div class="results-list" id="results-list"></div>
+                </div>
+            {% endif %}
         </section>
 
         <footer class="poll-detail-footer">
@@ -36,4 +93,8 @@
         </footer>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/vote.js' %}"></script>
 {% endblock %}
