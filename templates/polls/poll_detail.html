@@ -13,7 +13,7 @@
         
         <header class="poll-detail-header">
             <div class="poll-meta">
-                <a href="/kullanici/{{ poll.author.username }}/" class="poll-author">@{{ poll.author.username }}</a>
+                <a href="{% url 'polls:user_polls' poll.author.username %}" class="poll-author">@{{ poll.author.username }}</a>
                 <span class="meta-dot">&bull;</span>
                 <time class="poll-time">{{ poll.created_at|date:"d M Y, H:i" }}</time>
             </div>

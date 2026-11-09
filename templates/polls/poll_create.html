@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Yeni Anket Oluştur — Kararsızım{% endblock %}
+
+{% block content %}
+<div class="poll-create-wrapper">
+    <div class="card poll-create-card">
+        <h1 class="poll-create-title">Yeni Anket Oluştur</h1>
+        <p class="poll-create-subtitle">Aklındaki soruyu sor, en az 2 en fazla 5 seçenek belirle ve topluluğun fikrini al.</p>
+
+        {% if form.non_field_errors %}
+            <div class="form-errors">
+                {% for error in form.non_field_errors %}
+                    <p class="error-text">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if options_error %}
+            <div class="form-errors">
+                <p class="error-text">{{ options_error }}</p>
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'polls:create' %}" id="poll-create-form" class="poll-form" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.question.id_for_label }}" class="form-label">{{ form.question.label }} *</label>
+                {{ form.question }}
+                {% if form.question.help_text %}
+                    <small class="form-help">{{ form.question.help_text }}</small>
+                {% endif %}
+                {% if form.question.errors %}
+                    <div class="field-error">
+                        {% for error in form.question.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.help_text %}
+                    <small class="form-help">{{ form.description.help_text }}</small>
+                {% endif %}
+                {% if form.description.errors %}
+                    <div class="field-error">
+                        {% for error in form.description.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <fieldset class="options-fieldset">
+                <legend class="options-legend">Seçenekler (En az 2, en fazla 5)</legend>
+                <div id="options-container" class="options-inputs-list">
+                    {% for opt_val in options_data %}
+                        <div class="option-row">
+                            <div class="option-row-header">
+                                <span class="option-row-number">{{ forloop.counter }}. Seçenek</span>
+                                <button type="button" class="btn-remove-option" title="Bu seçeneği kaldır">Kaldır ✕</button>
+                            </div>
+                            <input type="text" 
+                                   name="options" 
+                                   class="form-control option-input" 
+                                   placeholder="Seçenek metnini yazın..." 
+                                   maxlength="100" 
+                                   value="{{ opt_val }}" 
+                                   required>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="options-actions">
+                    <button type="button" id="btn-add-option" class="btn btn-secondary btn-sm">+ Seçenek Ekle</button>
+                </div>
+            </fieldset>
+
+            <div class="form-submit-actions">
+                <button type="submit" class="btn btn-primary btn-block">Anketi Yayınla</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/poll_form.js' %}"></script>
+{% endblock %}

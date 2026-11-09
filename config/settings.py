@@ -3,6 +3,7 @@ Django settings for Kararsizim project.
 """
 
 import os
+import sys
 from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
@@ -72,7 +73,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # Supabase PostgreSQL (via DATABASE_URL) or local SQLite fallback
 database_url = os.getenv("DATABASE_URL")
-if database_url:
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db_test.sqlite3",
+        }
+    }
+elif database_url:
     DATABASES = {
         "default": dj_database_url.config(
             default=database_url,

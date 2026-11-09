@@ -1,10 +1,18 @@
 import json
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
+from .forms import PollCreateForm
 from .models import Option, Poll, Vote
+
+User = get_user_model()
 
 
 def get_user_vote(poll, request):
@@ -81,7 +89,6 @@ def vote_poll(request, pk):
     """Oy verme JSON endpoint'i (üye veya anonim)."""
     poll = get_object_or_404(Poll, pk=pk, is_active=True)
 
-    # İstek gövdesinden option_id'yi al (JSON veya POST formu)
     option_id = None
     if request.content_type == "application/json":
         try:
@@ -100,12 +107,10 @@ def vote_poll(request, pk):
     except (ValueError, TypeError):
         return JsonResponse({"error": "Geçersiz seçenek kimliği."}, status=400)
 
-    # Seçeneğin bu ankete ait olup olmadığını kontrol et
     option = poll.options.filter(id=option_id).first()
     if not option:
         return JsonResponse({"error": "Belirtilen seçenek bu ankete ait değil."}, status=400)
 
-    # Oturum ve kullanıcı belirleme
     user = request.user if request.user.is_authenticated else None
     session_key = None
 
@@ -113,7 +118,6 @@ def vote_poll(request, pk):
         if Vote.objects.filter(poll=poll, user=user).exists():
             return JsonResponse({"error": "Bu ankette daha önce oy kullandınız."}, status=400)
     else:
-        # Anonim oy: oturum yoksa oluştur
         if not request.session.session_key:
             request.session.create()
         session_key = request.session.session_key
@@ -121,7 +125,6 @@ def vote_poll(request, pk):
         if Vote.objects.filter(poll=poll, session_key=session_key).exists():
             return JsonResponse({"error": "Bu ankette daha önce oy kullandınız."}, status=400)
 
-    # Oy kaydı
     vote = Vote.objects.create(
         poll=poll,
         option=option,
@@ -129,7 +132,6 @@ def vote_poll(request, pk):
         session_key=session_key,
     )
 
-    # Güncel anket sonuçlarını hesapla ve JSON döndür
     poll_results = calculate_poll_results(poll, user_vote=vote)
 
     return JsonResponse({
@@ -139,3 +141,77 @@ def vote_poll(request, pk):
         "total_votes": poll_results["total_votes"],
         "options": poll_results["options"],
     })
+
+
+def create_poll(request):
+    """Yeni anket oluşturma (Sadece giriş yapmış kullanıcılar)."""
+    if not request.user.is_authenticated:
+        messages.info(request, "Anket oluşturabilmek için lütfen giriş yapın veya üye olun.")
+        return redirect(f"{reverse('accounts:login')}?next={request.path}")
+
+    options_error = None
+    options_data = ["", ""]  # Başlangıçta 2 boş seçenek
+
+    if request.method == "POST":
+        form = PollCreateForm(request.POST)
+        raw_options = request.POST.getlist("options")
+        options_data = raw_options if raw_options else ["", ""]
+
+        try:
+            cleaned_options = PollCreateForm.clean_options(raw_options)
+        except ValidationError as e:
+            options_error = e.message
+            cleaned_options = None
+
+        if form.is_valid() and not options_error:
+            with transaction.atomic():
+                poll = form.save(commit=False)
+                poll.author = request.user
+                poll.save()
+
+                for index, option_text in enumerate(cleaned_options):
+                    Option.objects.create(
+                        poll=poll,
+                        text=option_text,
+                        position=index,
+                    )
+
+            messages.success(request, "Anketiniz başarıyla paylaşıldı!")
+            return redirect("polls:detail", pk=poll.pk)
+    else:
+        form = PollCreateForm()
+
+    return render(
+        request,
+        "polls/poll_create.html",
+        {
+            "form": form,
+            "options_data": options_data,
+            "options_error": options_error,
+        },
+    )
+
+
+def user_polls(request, username):
+    """Belirli bir kullanıcının paylaştığı anketlerin listesi (E-posta ASLA gösterilmez)."""
+    user_obj = get_object_or_404(User, username=username)
+
+    poll_list = (
+        Poll.objects.filter(author=user_obj, is_active=True)
+        .prefetch_related("options")
+        .order_by("-created_at")
+    )
+
+    paginator = Paginator(poll_list, 10)
+    page_number = request.GET.get("sayfa")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "polls/user_polls.html",
+        {
+            "profile_user": user_obj,
+            "page_obj": page_obj,
+            "total_polls": poll_list.count(),
+        },
+    )

@@ -7,7 +7,7 @@
     <h1 class="hero-title">İki arada bir derede mi kaldın?</h1>
     <p class="hero-subtitle">Topluluğa danış, oy topla ve en doğru kararı ver.</p>
     <div>
-        <a href="/anket/yeni/" class="btn btn-primary">+ Yeni Anket Oluştur</a>
+        <a href="{% url 'polls:create' %}" class="btn btn-primary">+ Yeni Anket Oluştur</a>
     </div>
 </section>
 
@@ -19,7 +19,7 @@
             {% for poll in page_obj %}
                 <article class="card poll-card">
                     <div class="poll-card-header">
-                        <a href="/kullanici/{{ poll.author.username }}/" class="poll-author">@{{ poll.author.username }}</a>
+                        <a href="{% url 'polls:user_polls' poll.author.username %}" class="poll-author">@{{ poll.author.username }}</a>
                         <time class="poll-time" datetime="{{ poll.created_at|date:'c' }}">{{ poll.created_at|date:"d M Y, H:i" }}</time>
                     </div>
 
@@ -58,7 +58,7 @@
         <div class="card empty-state">
             <p class="empty-text">Henüz paylaşılan bir anket yok.</p>
             <p class="empty-subtext">Aklındaki ilk kararsızlığı sormak için hemen bir anket oluşturabilirsin!</p>
-            <a href="/anket/yeni/" class="btn btn-primary" style="margin-top: 1rem;">İlk Anketi Oluştur</a>
+            <a href="{% url 'polls:create' %}" class="btn btn-primary" style="margin-top: 1rem;">İlk Anketi Oluştur</a>
         </div>
     {% endif %}
 </section>

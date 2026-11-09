@@ -123,7 +123,6 @@ class PollViewTests(TestCase):
         self.assertEqual(data["options"][0]["vote_count"], 1)
         self.assertEqual(data["options"][0]["percentage"], 100.0)
 
-        # Veritabanında oy oluştu mu
         self.assertEqual(Vote.objects.filter(poll=self.poll).count(), 1)
         vote = Vote.objects.first()
         self.assertIsNone(vote.user)
@@ -134,7 +133,6 @@ class PollViewTests(TestCase):
         payload1 = json.dumps({"option_id": self.option1.id})
         self.client.post(url, data=payload1, content_type="application/json")
 
-        # İkinci oy denemesi
         payload2 = json.dumps({"option_id": self.option2.id})
         response2 = self.client.post(url, data=payload2, content_type="application/json")
 
@@ -155,13 +153,11 @@ class PollViewTests(TestCase):
         self.assertIsNotNone(vote)
         self.assertEqual(vote.option, self.option2)
 
-        # İkinci oy denemesi
         response2 = self.client.post(url, data=payload, content_type="application/json")
         self.assertEqual(response2.status_code, 400)
         self.assertIn("daha önce oy kullandınız", response2.json()["error"])
 
     def test_vote_invalid_option_fails(self):
-        # Başka bir anketin seçeneği
         other_poll = Poll.objects.create(author=self.author, question="Başka soru")
         other_option = Option.objects.create(poll=other_poll, text="Başka seçenek", position=0)
 
@@ -173,7 +169,6 @@ class PollViewTests(TestCase):
         self.assertIn("bu ankete ait değil", response.json()["error"])
 
     def test_detail_view_shows_results_after_voting(self):
-        # Kullanıcı oy kullandıktan sonra detay sayfasını yenilediğinde sonuçları görmelidir
         self.client.login(email="oyveren@example.com", password="Parola123!")
         Vote.objects.create(poll=self.poll, option=self.option1, user=self.voter)
 
@@ -183,3 +178,84 @@ class PollViewTests(TestCase):
         self.assertContains(response, "Senin Oyun")
         self.assertContains(response, "1 Toplam Oy")
         self.assertNotContains(response, "Fikrini belirtmek için bir seçeneğe tıkla")
+
+    # Faz 4 Testleri: Anket Oluşturma ve Kullanıcı Profili
+    def test_create_poll_unauthenticated_redirect(self):
+        url = reverse("polls:create")
+        response = self.client.get(url, follow=True)
+        login_url = reverse("accounts:login")
+        self.assertRedirects(response, f"{login_url}?next={url}")
+        self.assertContains(response, "Anket oluşturabilmek için lütfen giriş yapın veya üye olun.")
+
+    def test_create_poll_authenticated_get(self):
+        self.client.login(email="yazar2@example.com", password="Parola123!")
+        response = self.client.get(reverse("polls:create"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Yeni Anket Oluştur")
+        self.assertContains(response, "Seçenekler (En az 2, en fazla 5)")
+
+    def test_create_poll_success(self):
+        self.client.login(email="yazar2@example.com", password="Parola123!")
+        post_data = {
+            "question": "Bugün sinemaya mı gitsem?",
+            "description": "Vizyonda harika filmler var.",
+            "options": ["Evet, git", "Hayır, evde kal", "Arkadaşlarınla buluş"],
+        }
+        response = self.client.post(reverse("polls:create"), post_data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Anketiniz başarıyla paylaşıldı!")
+        self.assertContains(response, "Bugün sinemaya mı gitsem?")
+        self.assertContains(response, "Evet, git")
+        self.assertContains(response, "Hayır, evde kal")
+        self.assertContains(response, "Arkadaşlarınla buluş")
+
+        new_poll = Poll.objects.get(question="Bugün sinemaya mı gitsem?")
+        self.assertEqual(new_poll.author, self.author)
+        self.assertEqual(new_poll.options.count(), 3)
+
+    def test_create_poll_insufficient_options(self):
+        self.client.login(email="yazar2@example.com", password="Parola123!")
+        post_data = {
+            "question": "Yetersiz seçenekli soru?",
+            "options": ["Tek Seçenek", ""],
+        }
+        response = self.client.post(reverse("polls:create"), post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "en az 2 geçerli seçenek bulunmalıdır")
+        self.assertFalse(Poll.objects.filter(question="Yetersiz seçenekli soru?").exists())
+
+    def test_create_poll_too_many_options(self):
+        self.client.login(email="yazar2@example.com", password="Parola123!")
+        post_data = {
+            "question": "Çok fazla seçenekli soru?",
+            "options": ["Opt 1", "Opt 2", "Opt 3", "Opt 4", "Opt 5", "Opt 6"],
+        }
+        response = self.client.post(reverse("polls:create"), post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "en fazla 5 seçenek bulunabilir")
+
+    def test_create_poll_duplicate_options(self):
+        self.client.login(email="yazar2@example.com", password="Parola123!")
+        post_data = {
+            "question": "Mükerrer seçenekli soru?",
+            "options": ["Sinema", "sinema"],  # Büyük-küçük harf duyarsız
+        }
+        response = self.client.post(reverse("polls:create"), post_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "birden fazla kez girdiniz")
+
+    def test_user_polls_view(self):
+        # Yazarın anketleri listelenmeli
+        url = reverse("polls:user_polls", kwargs={"username": self.author.username})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"@{self.author.username}")
+        self.assertContains(response, "Bu akşam ne yesem?")
+        self.assertContains(response, "1 Anket Paylaştı")
+        # E-posta ASLA sayfada bulunmamalı!
+        self.assertNotContains(response, self.author.email)
+
+    def test_user_polls_404_for_unknown_user(self):
+        url = reverse("polls:user_polls", kwargs={"username": "olmayan_biri_123"})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
