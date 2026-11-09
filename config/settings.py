@@ -150,3 +150,22 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "polls:home"
 LOGOUT_REDIRECT_URL = "polls:home"
+
+# CSRF Trusted Origins (Vercel & Custom Domains)
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.vercel.app",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+csrf_origins_env = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS")
+if csrf_origins_env:
+    CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_origins_env.split(",") if origin.strip()])
+
+# Production Security Settings (Enabled when DEBUG=False)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
