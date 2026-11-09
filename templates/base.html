@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kararsızım — Kararsız kaldığın konularda fikrini sor{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="nav-container">
+            <a href="{% url 'polls:home' %}" class="brand-logo">🤔 Kararsızım</a>
+            
+            <nav class="nav-actions">
+                <a href="/anket/yeni/" class="btn btn-primary btn-sm">+ Anket Oluştur</a>
+                
+                {% if user.is_authenticated %}
+                    <a href="/kullanici/{{ user.username }}/" class="user-badge nav-link">@{{ user.username }}</a>
+                    <form method="post" action="/cikis/" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary btn-sm">Çıkış</button>
+                    </form>
+                {% else %}
+                    <a href="/giris/" class="nav-link">Giriş</a>
+                    <a href="/kayit/" class="btn btn-secondary btn-sm">Üye Ol</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="message-item message-{{ message.tags|default:'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; {% now "Y" %} Kararsızım — Herkesin fikrini al, kararını ver.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

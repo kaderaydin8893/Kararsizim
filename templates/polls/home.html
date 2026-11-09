@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa — Kararsızım{% endblock %}
+
+{% block content %}
+<section class="card hero-box">
+    <h1 class="hero-title">İki arada bir derede mi kaldın?</h1>
+    <p class="hero-subtitle">Topluluğa danış, oy topla ve en doğru kararı ver.</p>
+    <div>
+        <a href="/anket/yeni/" class="btn btn-primary">Hemen Bir Soru Sor</a>
+    </div>
+</section>
+
+<section id="poll-feed">
+    <div class="card" style="text-align: center; color: var(--text-secondary);">
+        <p>Henüz anket bulunmuyor. İlk anketi sen oluşturabilirsin!</p>
+    </div>
+</section>
+{% endblock %}
