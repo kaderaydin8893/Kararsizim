@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ poll.question }} — Kararsızım{% endblock %}
+
+{% block content %}
+<div class="poll-detail-wrapper">
+    <div class="card poll-detail-card">
+        <header class="poll-detail-header">
+            <div class="poll-meta">
+                <a href="/kullanici/{{ poll.author.username }}/" class="poll-author">@{{ poll.author.username }}</a>
+                <span class="meta-dot">&bull;</span>
+                <time class="poll-time">{{ poll.created_at|date:"d M Y, H:i" }}</time>
+            </div>
+            <h1 class="poll-detail-question">{{ poll.question }}</h1>
+            {% if poll.description %}
+                <p class="poll-detail-description">{{ poll.description|linebreaksbr }}</p>
+            {% endif %}
+        </header>
+
+        <section class="poll-options-section">
+            <h2 class="options-heading">Seçenekler</h2>
+            <ul class="option-list">
+                {% for option in poll.options.all %}
+                    <li class="option-item">
+                        <span class="option-number">{{ forloop.counter }}.</span>
+                        <span class="option-text">{{ option.text }}</span>
+                    </li>
+                {% empty %}
+                    <li class="option-item-empty">Bu ankete henüz seçenek eklenmemiş.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <footer class="poll-detail-footer">
+            <a href="{% url 'polls:home' %}" class="btn btn-secondary btn-sm">&larr; Tüm Anketlere Dön</a>
+        </footer>
+    </div>
+</div>
+{% endblock %}
