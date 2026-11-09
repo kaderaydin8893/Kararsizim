@@ -5,22 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Kararsızım — Kararsız kaldığın konularda fikrini sor{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤔</text></svg>">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <header class="site-header">
         <div class="nav-container">
-            <a href="{% url 'polls:home' %}" class="brand-logo">🤔 Kararsızım</a>
+            <a href="{% url 'polls:home' %}" class="brand-logo" aria-label="Kararsızım Ana Sayfa">
+                <span class="brand-icon">🤔</span>
+                <span class="brand-name">Kararsızım</span>
+            </a>
             
-            <nav class="nav-actions">
-                <a href="{% url 'polls:create' %}" class="btn btn-primary btn-sm">+ Anket Oluştur</a>
+            <nav class="nav-actions" aria-label="Kullanıcı Menüsü">
+                <a href="{% url 'polls:create' %}" class="btn btn-primary btn-sm btn-create-poll">+ Anket Oluştur</a>
                 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'polls:user_polls' user.username %}" class="user-badge nav-link">@{{ user.username }}</a>
-                    <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                    <a href="{% url 'polls:user_polls' user.username %}" class="user-badge nav-link" title="Profilin">@{{ user.username }}</a>
+                    <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-secondary btn-sm">Çıkış</button>
+                        <button type="submit" class="btn btn-secondary btn-sm" aria-label="Oturumu Kapat">Çıkış</button>
                     </form>
                 {% else %}
                     <a href="{% url 'accounts:login' %}" class="nav-link">Giriş</a>
@@ -30,9 +34,9 @@
         </div>
     </header>
 
-    <main class="main-content">
+    <main class="main-content" id="main-content">
         {% if messages %}
-            <div class="messages-container">
+            <div class="messages-container" role="alert" aria-live="polite">
                 {% for message in messages %}
                     <div class="message-item message-{{ message.tags|default:'info' }}">
                         {{ message }}
@@ -45,7 +49,9 @@
     </main>
 
     <footer class="site-footer">
-        <p>&copy; {% now "Y" %} Kararsızım — Herkesin fikrini al, kararını ver.</p>
+        <div class="footer-content">
+            <p>&copy; {% now "Y" %} <strong>Kararsızım</strong> — Herkesin fikrini al, kararını ver.</p>
+        </div>
     </footer>
 
     {% block extra_js %}{% endblock %}

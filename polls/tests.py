@@ -259,3 +259,9 @@ class PollViewTests(TestCase):
         url = reverse("polls:user_polls", kwargs={"username": "olmayan_biri_123"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
+
+    def test_custom_404_template(self):
+        response = self.client.get("/var-olmayan-bir-sayfa-xyz/")
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, "404.html")
+        self.assertContains(response, "Aradığın Sayfa veya Anket Bulunamadı", status_code=404)

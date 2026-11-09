@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Sunucu Hatası (500) — Kararsızım{% endblock %}
+
+{% block content %}
+<div class="error-page-wrapper">
+    <div class="card error-page-card">
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-code">500</h1>
+        <h2 class="error-title">Beklenmedik Bir Sorun Oluştu</h2>
+        <p class="error-description">
+            Sunucularımızda anlık bir aksaklık yaşandı. Lütfen birkaç saniye sonra tekrar deneyin.
+        </p>
+        <div class="error-actions">
+            <a href="{% url 'polls:home' %}" class="btn btn-primary">Ana Sayfaya Dön</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
