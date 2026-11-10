@@ -15,7 +15,7 @@ pip install --no-cache-dir -r requirements.txt || { echo "❌ pip kurulumu başa
 echo "🧹 staticfiles klasörünü temizliyoruz..."
 rm -rf staticfiles/*
 echo "📦 collectstatic çalıştırılıyor..."
-python manage.py collectstatic --noinput --clear || { echo "❌ collectstatic hatası"; exit 1; }
+python manage.py collectstatic --noinput --clear -v 2 || { echo "❌ collectstatic hatası"; exit 1; }
 
 # 4️⃣ (Opsiyonel) Sanal ortamı kapat
 deactivate
