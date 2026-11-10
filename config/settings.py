@@ -136,11 +136,11 @@ STORAGES = {
     },
     "staticfiles": {
         "BACKEND": (
-            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            "whitenoise.storage.ManifestStaticFilesStorage"
             if not DEBUG
             else "django.contrib.staticfiles.storage.StaticFilesStorage"
         ),
-    },
+    },,
 }
 
 # Default primary key field type
