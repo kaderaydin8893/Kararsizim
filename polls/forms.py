@@ -10,7 +10,7 @@ class PollCreateForm(forms.ModelForm):
         widgets = {
             "question": forms.TextInput(
                 attrs={
-                    "placeholder": "örn. Bugün sinemaya mı gitsem, restorana mı?",
+                    "placeholder": "örn. Akşam yemeğinde pizza mı, sushi mi?",
                     "autocomplete": "off",
                     "maxlength": "200",
                 }

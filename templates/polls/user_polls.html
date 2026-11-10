@@ -4,26 +4,31 @@
 
 {% block content %}
 <div class="user-profile-wrapper">
-    <div class="card user-profile-header">
+    <div class="user-profile-header">
         <div class="user-profile-info">
             <h1 class="user-profile-username">@{{ profile_user.username }}</h1>
-            <p class="user-profile-stats">{{ total_polls }} Anket Paylaştı</p>
+            <p class="user-profile-stats">🎉 Toplam {{ total_polls }} Anket Paylaştı</p>
         </div>
         {% if user.is_authenticated and user == profile_user %}
-            <a href="{% url 'polls:create' %}" class="btn btn-primary btn-sm">+ Yeni Anket Oluştur</a>
+            <a href="{% url 'polls:create' %}" class="btn btn-hero btn-sm">+ Yeni Anket Oluştur 🚀</a>
         {% endif %}
     </div>
 
-    <section class="poll-feed-section">
+    <section class="poll-feed-section" style="margin-top: 1.5rem;">
         <h2 class="section-title">Oluşturduğu Anketler</h2>
 
         {% if page_obj %}
             <div class="poll-list">
                 {% for poll in page_obj %}
-                    <article class="card poll-card">
+                    <article class="card poll-card-colorful">
                         <div class="poll-card-header">
-                            <span class="poll-author">@{{ profile_user.username }}</span>
-                            <time class="poll-time" datetime="{{ poll.created_at|date:'c' }}">{{ poll.created_at|date:"d M Y, H:i" }}</time>
+                            <span class="poll-author-chip">
+                                <span class="chip-avatar">{{ profile_user.username|slice:":1"|upper }}</span>
+                                <span class="chip-name">@{{ profile_user.username }}</span>
+                            </span>
+                            <time class="poll-time" datetime="{{ poll.created_at|date:'c' }}">
+                                ⏱️ {{ poll.created_at|timesince }} önce
+                            </time>
                         </div>
 
                         <h3 class="poll-question">
@@ -35,8 +40,10 @@
                         {% endif %}
 
                         <div class="poll-card-footer">
-                            <span class="poll-badge">{{ poll.options.all|length }} Seçenek</span>
-                            <a href="{% url 'polls:detail' poll.pk %}" class="btn btn-secondary btn-sm">Görüntüle & Oy Ver &rarr;</a>
+                            <span class="poll-badge badge-options">🎯 {{ poll.options.all|length }} Seçenek</span>
+                            <a href="{% url 'polls:detail' poll.pk %}" class="btn btn-vote-action btn-sm">
+                                Görüntüle & Oy Ver 🗳️
+                            </a>
                         </div>
                     </article>
                 {% endfor %}
@@ -58,11 +65,12 @@
                 </nav>
             {% endif %}
         {% else %}
-            <div class="card empty-state">
+            <div class="card empty-state-colorful">
+                <div class="empty-icon">🎈</div>
                 <p class="empty-text">Henüz paylaşılan bir anket yok.</p>
                 <p class="empty-subtext">@{{ profile_user.username }} henüz herhangi bir soru sormadı.</p>
                 {% if user.is_authenticated and user == profile_user %}
-                    <a href="{% url 'polls:create' %}" class="btn btn-primary" style="margin-top: 1rem;">İlk Anketi Oluştur</a>
+                    <a href="{% url 'polls:create' %}" class="btn btn-primary" style="margin-top: 1rem;">İlk Anketi Sen Oluştur 🚀</a>
                 {% endif %}
             </div>
         {% endif %}

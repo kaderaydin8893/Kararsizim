@@ -4,8 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Kararsızım — Kararsız kaldığın konularda fikrini sor{% endblock %}</title>
+    <title>{% block title %}Kararsızım — Kararsız kaldığın konularda topluluğa danış{% endblock %}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤔</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
@@ -15,19 +18,23 @@
             <a href="{% url 'polls:home' %}" class="brand-logo" aria-label="Kararsızım Ana Sayfa">
                 <span class="brand-icon">🤔</span>
                 <span class="brand-name">Kararsızım</span>
+                <span class="brand-sparkle">✨</span>
             </a>
             
             <nav class="nav-actions" aria-label="Kullanıcı Menüsü">
-                <a href="{% url 'polls:create' %}" class="btn btn-primary btn-sm btn-create-poll">+ Anket Oluştur</a>
+                <a href="{% url 'polls:create' %}" class="btn btn-create-poll">+ Anket Oluştur 🚀</a>
                 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'polls:user_polls' user.username %}" class="user-badge nav-link" title="Profilin">@{{ user.username }}</a>
+                    <a href="{% url 'polls:user_polls' user.username %}" class="user-badge nav-link" title="Profilin">
+                        <span class="avatar-circle">{{ user.username|slice:":1"|upper }}</span>
+                        <span class="user-name-text">@{{ user.username }}</span>
+                    </a>
                     <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-secondary btn-sm" aria-label="Oturumu Kapat">Çıkış</button>
+                        <button type="submit" class="btn btn-ghost btn-sm" aria-label="Oturumu Kapat">Çıkış</button>
                     </form>
                 {% else %}
-                    <a href="{% url 'accounts:login' %}" class="nav-link">Giriş</a>
+                    <a href="{% url 'accounts:login' %}" class="nav-link font-medium">Giriş</a>
                     <a href="{% url 'accounts:register' %}" class="btn btn-secondary btn-sm">Üye Ol</a>
                 {% endif %}
             </nav>
@@ -39,7 +46,10 @@
             <div class="messages-container" role="alert" aria-live="polite">
                 {% for message in messages %}
                     <div class="message-item message-{{ message.tags|default:'info' }}">
-                        {{ message }}
+                        <span class="message-icon">
+                            {% if message.tags == 'success' %}🎉{% elif message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}
+                        </span>
+                        <span>{{ message }}</span>
                     </div>
                 {% endfor %}
             </div>
@@ -50,7 +60,8 @@
 
     <footer class="site-footer">
         <div class="footer-content">
-            <p>&copy; {% now "Y" %} <strong>Kararsızım</strong> — Herkesin fikrini al, kararını ver.</p>
+            <p>🤔 <strong>Kararsızım</strong> — Aklındaki tüm kararsızlıkları sor, oy topla ve eğlenerek karar ver!</p>
+            <p class="footer-sub">&copy; {% now "Y" %} Kararsızım. Topluluk odaklı fikir ve anket platformu.</p>
         </div>
     </footer>
 

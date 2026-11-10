@@ -1,26 +1,50 @@
 {% extends "base.html" %}
 
-{% block title %}Ana Sayfa — Kararsızım{% endblock %}
+{% block title %}Kararsızım — Popüler Anketler ve Kararlar{% endblock %}
 
 {% block content %}
-<section class="card hero-box">
-    <h1 class="hero-title">İki arada bir derede mi kaldın?</h1>
-    <p class="hero-subtitle">Topluluğa danış, oy topla ve en doğru kararı ver.</p>
-    <div>
-        <a href="{% url 'polls:create' %}" class="btn btn-primary">+ Yeni Anket Oluştur</a>
+<section class="hero-colorful">
+    <div class="hero-badge">✨ Türkiye'nin Kararsızlar Topluluğu</div>
+    <h1 class="hero-title">İki arada bir derede mi kaldın? 🤔</h1>
+    <p class="hero-subtitle">
+        Pizza mı burger mi? Tatilde deniz mi dağ mı? Aklındaki tüm ikilemleri topluluğa sor, 
+        hızlıca oyları topla ve kararını ver!
+    </p>
+    
+    <div class="hero-actions">
+        <a href="{% url 'polls:create' %}" class="btn btn-hero">+ Hemen Bir Soru Sor 🚀</a>
+    </div>
+
+    <div class="hero-tags">
+        <span class="hero-tag">🍕 Yemek & Mutfak</span>
+        <span class="hero-tag">🎬 Film & Dizi</span>
+        <span class="hero-tag">🏖️ Seyahat & Tatil</span>
+        <span class="hero-tag">☕ Günlük Yaşam</span>
+        <span class="hero-tag">🎮 Oyun & Eğlence</span>
     </div>
 </section>
 
 <section class="poll-feed-section">
-    <h2 class="section-title">En Yeni Anketler</h2>
+    <div class="feed-header-row">
+        <div>
+            <h2 class="section-title">🔥 Trend Kararsızlıklar</h2>
+            <p class="section-subtitle">Topluluğun en çok konuştuğu ve oyladığı güncel anketler</p>
+        </div>
+        <a href="{% url 'polls:create' %}" class="btn btn-outline-primary btn-sm">+ Yeni Anket</a>
+    </div>
 
     {% if page_obj %}
         <div class="poll-list">
             {% for poll in page_obj %}
-                <article class="card poll-card">
+                <article class="card poll-card-colorful">
                     <div class="poll-card-header">
-                        <a href="{% url 'polls:user_polls' poll.author.username %}" class="poll-author">@{{ poll.author.username }}</a>
-                        <time class="poll-time" datetime="{{ poll.created_at|date:'c' }}">{{ poll.created_at|date:"d M Y, H:i" }}</time>
+                        <a href="{% url 'polls:user_polls' poll.author.username %}" class="poll-author-chip">
+                            <span class="chip-avatar">{{ poll.author.username|slice:":1"|upper }}</span>
+                            <span class="chip-name">@{{ poll.author.username }}</span>
+                        </a>
+                        <time class="poll-time" datetime="{{ poll.created_at|date:'c' }}">
+                            ⏱️ {{ poll.created_at|timesince }} önce
+                        </time>
                     </div>
 
                     <h3 class="poll-question">
@@ -28,12 +52,16 @@
                     </h3>
 
                     {% if poll.description %}
-                        <p class="poll-description">{{ poll.description|truncatechars:140 }}</p>
+                        <p class="poll-description">{{ poll.description|truncatechars:150 }}</p>
                     {% endif %}
 
                     <div class="poll-card-footer">
-                        <span class="poll-badge">{{ poll.options.all|length }} Seçenek</span>
-                        <a href="{% url 'polls:detail' poll.pk %}" class="btn btn-secondary btn-sm">Görüntüle & Oy Ver &rarr;</a>
+                        <div class="poll-meta-badges">
+                            <span class="poll-badge badge-options">🎯 {{ poll.options.all|length }} Seçenek</span>
+                        </div>
+                        <a href="{% url 'polls:detail' poll.pk %}" class="btn btn-vote-action btn-sm">
+                            Görüntüle & Oy Ver 🗳️
+                        </a>
                     </div>
                 </article>
             {% endfor %}
@@ -55,10 +83,11 @@
             </nav>
         {% endif %}
     {% else %}
-        <div class="card empty-state">
-            <p class="empty-text">Henüz paylaşılan bir anket yok.</p>
-            <p class="empty-subtext">Aklındaki ilk kararsızlığı sormak için hemen bir anket oluşturabilirsin!</p>
-            <a href="{% url 'polls:create' %}" class="btn btn-primary" style="margin-top: 1rem;">İlk Anketi Oluştur</a>
+        <div class="card empty-state-colorful">
+            <div class="empty-icon">🎈</div>
+            <p class="empty-text">Henüz paylaşılan bir anket yok!</p>
+            <p class="empty-subtext">Aklındaki ilk kararsızlığı sormak ve ilk oyları toplamak için hemen başla.</p>
+            <a href="{% url 'polls:create' %}" class="btn btn-primary" style="margin-top: 1.25rem;">İlk Anketi Sen Oluştur 🚀</a>
         </div>
     {% endif %}
 </section>

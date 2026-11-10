@@ -13,9 +13,12 @@
         
         <header class="poll-detail-header">
             <div class="poll-meta">
-                <a href="{% url 'polls:user_polls' poll.author.username %}" class="poll-author">@{{ poll.author.username }}</a>
+                <a href="{% url 'polls:user_polls' poll.author.username %}" class="poll-author-chip">
+                    <span class="chip-avatar">{{ poll.author.username|slice:":1"|upper }}</span>
+                    <span class="chip-name">@{{ poll.author.username }}</span>
+                </a>
                 <span class="meta-dot">&bull;</span>
-                <time class="poll-time">{{ poll.created_at|date:"d M Y, H:i" }}</time>
+                <time class="poll-time">📅 {{ poll.created_at|date:"d M Y, H:i" }}</time>
             </div>
             <h1 class="poll-detail-question">{{ poll.question }}</h1>
             {% if poll.description %}
@@ -27,11 +30,14 @@
             <div id="vote-alert" class="message-item message-error" style="display: none;"></div>
 
             {% if user_vote %}
-                {# Daha önce oy kullanılmışsa sonuçları doğrudan göster #}
+                {# Daha önce oy kullanılmışsa sonuçları göster #}
                 <div class="results-container" id="results-container">
                     <div class="results-header">
-                        <span class="results-title">Anket Sonuçları</span>
-                        <span class="total-votes-badge" id="total-votes-count">{{ poll_results.total_votes }} Toplam Oy</span>
+                        <div class="results-title-group">
+                            <span class="results-icon">📊</span>
+                            <span class="results-title">Anket Sonuçları</span>
+                        </div>
+                        <span class="total-votes-badge" id="total-votes-count">🎉 {{ poll_results.total_votes }} Toplam Oy</span>
                     </div>
 
                     <div class="results-list" id="results-list">
@@ -45,7 +51,7 @@
                                         {% endif %}
                                     </span>
                                     <span class="result-stats">
-                                        <strong>%{{ option.percentage }}</strong>
+                                        <strong class="percentage-number">%{{ option.percentage }}</strong>
                                         <small class="vote-count-text">({{ option.vote_count }} oy)</small>
                                     </span>
                                 </div>
@@ -60,7 +66,7 @@
             {% else %}
                 {# Henüz oy verilmemişse oy butonlarını göster #}
                 <div class="voting-box" id="voting-box">
-                    <p class="voting-instruction">Fikrini belirtmek için bir seçeneğe tıkla:</p>
+                    <p class="voting-instruction">👉 Fikrini belirtmek için hemen bir seçeneğe dokun:</p>
                     
                     <form method="post" action="{% url 'polls:vote' poll.pk %}" id="vote-form" class="voting-form">
                         {% csrf_token %}
@@ -69,8 +75,9 @@
                                 <button type="button" 
                                         class="vote-option-btn" 
                                         data-option-id="{{ option.id }}">
-                                    <span class="btn-option-indicator"></span>
+                                    <span class="btn-option-badge">{{ forloop.counter }}</span>
                                     <span class="btn-option-text">{{ option.text }}</span>
+                                    <span class="btn-option-action">Oy Ver 👆</span>
                                 </button>
                             {% endfor %}
                         </div>
@@ -80,7 +87,10 @@
                 {# Dinamik JavaScript sonuç kapsayıcısı (başlangıçta gizli) #}
                 <div class="results-container" id="results-container" style="display: none;">
                     <div class="results-header">
-                        <span class="results-title">Anket Sonuçları</span>
+                        <div class="results-title-group">
+                            <span class="results-icon">📊</span>
+                            <span class="results-title">Anket Sonuçları</span>
+                        </div>
                         <span class="total-votes-badge" id="total-votes-count">0 Toplam Oy</span>
                     </div>
                     <div class="results-list" id="results-list"></div>
@@ -89,7 +99,7 @@
         </section>
 
         <footer class="poll-detail-footer">
-            <a href="{% url 'polls:home' %}" class="btn btn-secondary btn-sm">&larr; Tüm Anketlere Dön</a>
+            <a href="{% url 'polls:home' %}" class="btn btn-secondary btn-sm">&larr; Diğer Anketlere Göz At</a>
         </footer>
     </div>
 </div>
